@@ -133,7 +133,7 @@ class RubiksCube():
         self.red = np.vstack([   [1, 1], [1, 1], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]])
         self.white = np.vstack([ [0, 0], [0, 0], [1, 1], [1, 1], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]])
         self.orange = np.vstack([[0, 0], [0, 0], [0, 0], [0, 0], [1, 1], [1, 1], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]])
-        self.yellow = np.vstack([[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]])
+        self.yellow = np.vstack([[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 1], [1, 1], [0, 0], [0, 0], [0, 0], [0, 0]])
         self.blue = np.vstack([  [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 1], [1, 1], [0, 0], [0, 0]])
         self.green = np.vstack([ [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 1], [1, 1]])
 
@@ -145,17 +145,21 @@ class RubiksCube():
         self.solved_green = self.green.copy()
 
         self.nMoves = 0
-        self.mix(self.nMix)
+        mixed_actions = self.mix(self.nMix)
 
-        return self.flatten()
+        self.nMoves = 0
+
+        return self.flatten(), mixed_actions
 
     def mix(self, num_actions):
-
+        actions = []
         for i in range(num_actions):
 
             action = self.sample_action()
+            actions.append(action)
 
             self.step(action)
+        return actions
 
 
     def sample_action(self):
@@ -171,3 +175,11 @@ class RubiksCube():
     def is_solved(self):
 
         return np.all(self.red == self.solved_red) and np.all(self.white == self.solved_white) and np.all(self.orange == self.solved_orange) and np.all(self.yellow == self.solved_yellow) and np.all(self.blue == self.solved_blue) and np.all(self.green == self.solved_green)
+
+cube = RubiksCube()
+print(cube.is_solved())
+cube.step(0)
+cube.step(2)
+cube.step(3)
+cube.step(1)
+print(cube.is_solved())
