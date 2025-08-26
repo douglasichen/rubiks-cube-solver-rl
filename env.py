@@ -1,35 +1,29 @@
 import numpy as np
 import random
 
-
 class RubiksCube():
 
     def __init__(self):
 
+        self.reward_for_solving = 10
         self.nS = 144
         self.nA = 6
-        self.nMix = 1
-        # max moves?
-        self.nMoves = 0
 
-        self.reset()
+        self.reset(0)
 
-    def set_nMix(self, nMix):
-        self.nMix = nMix
-    
-    def step(self, action):
-
-        self.do_step(action)
-        self.nMoves += 1
-        reward = -1
+    # n is max number of moves
+    def step(self, action: int, moves: int, n: int):
         done = False
+        self.do_step(action)
+        reward = -1
 
-        if self.nMoves >= self.nMix:
+
+        if moves >= n:
             done = True
         
         if self.is_solved():
-            reward = 10
-            done = 1
+            reward = self.reward_for_solving
+            done = True
 
         return self.flatten(), reward, done, {}
 
@@ -126,7 +120,7 @@ class RubiksCube():
 
         return self.rotation_cw(self.rotation_cw(side))
     
-    def reset(self):
+    def reset(self, n: int):
 
         self.numbered = np.vstack([ [1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12], [13, 14], [15, 16], [17, 18], [19, 20], [21, 22], [23, 24]])
 
@@ -144,21 +138,18 @@ class RubiksCube():
         self.solved_blue = self.blue.copy()
         self.solved_green = self.green.copy()
 
-        self.nMoves = 0
-        mixed_actions = self.mix(self.nMix)
+        mix_actions = self.mix(n)
 
-        self.nMoves = 0
-
-        return self.flatten(), mixed_actions
+        return self.flatten(), mix_actions
 
     def mix(self, num_actions):
         actions = []
-        for i in range(num_actions):
+        for _ in range(num_actions):
 
             action = self.sample_action()
             actions.append(action)
 
-            self.step(action)
+            self.do_step(action)
         return actions
 
 
@@ -176,10 +167,3 @@ class RubiksCube():
 
         return np.all(self.red == self.solved_red) and np.all(self.white == self.solved_white) and np.all(self.orange == self.solved_orange) and np.all(self.yellow == self.solved_yellow) and np.all(self.blue == self.solved_blue) and np.all(self.green == self.solved_green)
 
-cube = RubiksCube()
-print(cube.is_solved())
-cube.step(0)
-cube.step(2)
-cube.step(3)
-cube.step(1)
-print(cube.is_solved())
