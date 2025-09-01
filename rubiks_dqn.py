@@ -32,20 +32,26 @@ def calc_epsilon(episode_start: int, episode_end: int, episode_at: int):
 
 # n_points[n] represents the end of an interval
 multiplier = 7
-n_points = [0, 1800, 1800*multiplier, 1800*multiplier*multiplier*multiplier]
+# n_points = [0, 1800, 1800*multiplier, 1800*multiplier*multiplier*multiplier*multiplier]
+# n_points = [0, 1000, 1000*multiplier]
+
+n_points = [0, 1800, 1800*multiplier, 1800*multiplier*multiplier]
 
 # Create the Cube environment
 env = RubiksCube()
 
 # Constants
-MODEL_SAVE_PERIOD = 30000
+MODEL_SAVE_PERIOD = 10000
 GAMMA = 0.99
 LEARNING_RATE = 0.001
 EPSILON_MIN = 0.00001
 
-initial_batch_size = 128
+initial_batch_size = 256
 initial_target_update_freq = 1500
 initial_memory_size = 15000
+# initial_batch_size = 64
+# initial_target_update_freq = 1000
+# initial_memory_size = 10000
 EPISODES = n_points[-1]
 
 # Initialize Q-networks, optimizer, memory
