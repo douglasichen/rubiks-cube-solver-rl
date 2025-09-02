@@ -35,15 +35,18 @@ multiplier = 7
 # n_points = [0, 1800, 1800*multiplier, 1800*multiplier*multiplier*multiplier*multiplier]
 # n_points = [0, 1000, 1000*multiplier]
 
-n_points = [0, 1800, 1800*multiplier, 1800*multiplier*multiplier]
+# n_points = [0, 1800, 1800*multiplier, 1800*multiplier*multiplier, 1800*multiplier*multiplier*multiplier]
+# n_points = [0, 1000, 2000, 20_000, 40_000]
+# n_points = [0, 1000, 2000, 15_000]
+n_points = [0, 1000, 2000, 20_000]
 
 # Create the Cube environment
 env = RubiksCube()
 
 # Constants
-MODEL_SAVE_PERIOD = 10000
+MODEL_SAVE_PERIOD = 100_000
 GAMMA = 0.99
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.001/10/10
 EPSILON_MIN = 0.00001
 
 initial_batch_size = 256

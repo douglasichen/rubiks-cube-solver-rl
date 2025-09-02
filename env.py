@@ -5,7 +5,7 @@ class RubiksCube():
 
     def __init__(self):
 
-        self.reward_for_solving = 20
+        self.reward_for_solving = 5
         self.nS = 144
         self.nA = 6
 
