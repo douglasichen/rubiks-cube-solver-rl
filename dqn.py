@@ -25,6 +25,7 @@ class DQN(nn.Module):
 
 def calc_epsilon(episode_start: int, episode_end: int, episode_at: int):
     n = episode_end - episode_start
+    # k = 0.002
     k = 0.002
     x = episode_at - episode_start
     epsilon = pow(k, 2 * x / n)
@@ -53,6 +54,7 @@ EPSILON_MIN = 0.00001
 # memory_size = 15000
 # episodes = n_points[-1]
 
+
 def init_training(env: RubiksCube, learning_rate: float, memory_size: int):
     input_dim = len(env.flatten())
     output_dim = env.nA
@@ -63,6 +65,7 @@ def init_training(env: RubiksCube, learning_rate: float, memory_size: int):
     memory = deque(maxlen=memory_size)
 
     return policy_net, target_net, optimizer, memory
+
 
 # Function to choose action using epsilon-greedy policy
 def select_action(policy: DQN, state, epsilon: float, env: RubiksCube) -> int:
@@ -80,8 +83,25 @@ def select_n(max_n: int) -> int:
     weights = list(range(1, max_n + 1))
     return random.choices(numbers, weights=weights, k=1)[0]
 
+
+def select_n_2(n: int, peak: int = 80) -> int:
+    i = np.arange(1, n + 1, dtype=float)
+    arr = 3**i
+    arr = arr / arr[-1] * peak
+    arr[:-1] = arr[:-1] / arr[:-1].sum() * (100 - peak)
+    arr[-1] = peak
+
+    return random.choices(range(1, n + 1), weights=arr, k=1)[0]
+
 # Function to optimize the model using experience replay
-def optimize_model(batch_size: int, gamma: float, memory: deque, policy_net: DQN, target_net: DQN, optimizer: optim.Optimizer):
+def optimize_model(
+    batch_size: int,
+    gamma: float,
+    memory: deque,
+    policy_net: DQN,
+    target_net: DQN,
+    optimizer: optim.Optimizer,
+):
     if len(memory) < batch_size:
         return
 
@@ -109,27 +129,43 @@ def optimize_model(batch_size: int, gamma: float, memory: deque, policy_net: DQN
     optimizer.step()
 
 
-
-def train(gamma: float, learning_rate: float, batch_size: int, target_update_freq: int, memory_size: int, reward_for_solving: int, n_points: list[int], create_graph: bool = False, save_model: bool = False):
-
+def train(
+    gamma: float,
+    learning_rate: float,
+    batch_size: int,
+    target_update_freq: int,
+    memory_size: int,
+    reward_for_solving: int,
+    n_points: list[int],
+    create_graph: bool = False,
+    save_model: bool = False,
+):
     episodes = n_points[-1]
     env = RubiksCube(reward_for_solving=reward_for_solving)
-    policy_net, target_net, optimizer, memory = init_training(env, learning_rate, memory_size)
+    policy_net, target_net, optimizer, memory = init_training(
+        env, learning_rate, memory_size
+    )
 
     if create_graph:
         # Initialize data structures to track rewards and epsilon per selected_n
         max_n = len(n_points) - 1  # Maximum n based on n_points
-        rewards_per_n = {i: [] for i in range(1, max_n + 1)}  # Rewards for each selected_n
-        epsilon_per_n = {i: [] for i in range(1, max_n + 1)}  # Epsilon for each selected_n
-        episode_per_n = {i: [] for i in range(1, max_n + 1)}  # Episode numbers for each selected_n
+        rewards_per_n = {
+            i: [] for i in range(1, max_n + 1)
+        }  # Rewards for each selected_n
+        epsilon_per_n = {
+            i: [] for i in range(1, max_n + 1)
+        }  # Epsilon for each selected_n
+        episode_per_n = {
+            i: [] for i in range(1, max_n + 1)
+        }  # Episode numbers for each selected_n
 
     # Main training loop
     steps_done = 0
     n = 1
-    
+
     # Create progress bar for training
     progress_bar = tqdm(range(episodes), desc="Training DQN", unit="episode")
-    
+
     for episode in progress_bar:
         # Update n and epsilon
         epsilon = calc_epsilon(n_points[n - 1], n_points[n], episode)
@@ -169,12 +205,14 @@ def train(gamma: float, learning_rate: float, batch_size: int, target_update_fre
             steps_done += 1
 
         # Update progress bar with current metrics
-        progress_bar.set_postfix({
-            'epsilon': f'{epsilon:.6f}',
-            'reward': f'{episode_reward:.2f}',
-            'selected_n': selected_n,
-            'memory': len(memory)
-        })
+        progress_bar.set_postfix(
+            {
+                "epsilon": f"{epsilon:.6f}",
+                "reward": f"{episode_reward:.2f}",
+                "selected_n": selected_n,
+                "memory": len(memory),
+            }
+        )
 
         if create_graph:
             # Store rewards, epsilon, and episode for this selected_n
@@ -187,7 +225,6 @@ def train(gamma: float, learning_rate: float, batch_size: int, target_update_fre
             torch.save(policy_net.state_dict(), f"rubiks_dqn_policy_net_{episode}.pt")
             torch.save(target_net.state_dict(), f"rubiks_dqn_target_net_{episode}.pt")
 
-
     if create_graph:
         # Plotting: Create a single figure with subplots for rewards and epsilon per selected_n
         fig, axes = plt.subplots(max_n, 2, figsize=(12, 4 * max_n), sharex=True)
@@ -196,12 +233,23 @@ def train(gamma: float, learning_rate: float, batch_size: int, target_update_fre
         for i in range(max_n):
             selected_n = i + 1
             # Rewards subplot (left column)
-            axes[i][0].plot(episode_per_n[selected_n], rewards_per_n[selected_n], color="blue", label=f"selected_n = {selected_n}")
+            axes[i][0].plot(
+                episode_per_n[selected_n],
+                rewards_per_n[selected_n],
+                color="blue",
+                label=f"selected_n = {selected_n}",
+            )
             axes[i][0].set_ylabel("Reward")
             axes[i][0].set_title(f"Rewards for selected_n = {selected_n}")
             axes[i][0].legend()
             # Epsilon subplot (right column)
-            axes[i][1].plot(episode_per_n[selected_n], epsilon_per_n[selected_n], color="red", label=f"selected_n = {selected_n}", alpha=0.6)
+            axes[i][1].plot(
+                episode_per_n[selected_n],
+                epsilon_per_n[selected_n],
+                color="red",
+                label=f"selected_n = {selected_n}",
+                alpha=0.6,
+            )
             axes[i][1].set_ylabel("Epsilon")
             axes[i][1].set_title(f"Epsilon for selected_n = {selected_n}")
             axes[i][1].legend()
@@ -210,5 +258,5 @@ def train(gamma: float, learning_rate: float, batch_size: int, target_update_fre
         fig.suptitle("Rewards and Epsilon per Episode by selected_n")
         plt.tight_layout()
         plt.show()
-    
+
     return policy_net

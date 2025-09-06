@@ -14,5 +14,5 @@ policy = train(
 )
 
 
-for n in range(14):
+for n in range(1,50):
     print(f"n={n}: {test(policy, n, 100) * 100:.1f}% success rate")
