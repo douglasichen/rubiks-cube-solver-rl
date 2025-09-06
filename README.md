@@ -2,14 +2,6 @@
 
 A reinforcement learning project that trains a Deep Q-Network to solve a 2x2x2 Rubik's cube using PyTorch. The agent learns through curriculum learning, starting with simple scrambles and progressively tackling more complex cube configurations.
 
-## Overview
-
-This project implements a Deep Q-Network (DQN) agent that learns to solve a Rubik's cube through reinforcement learning. The cube is represented as a 2x2x2 configuration with 6 faces, and the agent learns to perform the optimal sequence of moves to return the cube to its solved state.
-
-## Algorithm Approach
-
-The project uses a curriculum learning strategy where the agent trains on progressively more difficult scrambled cubes. This approach mimics human learning - starting with simple problems and gradually increasing complexity.
-
 ### Key Algorithm Components
 
 **Progressive Difficulty Training**: The algorithm controls the number of random moves `n` used to scramble the cube from its solved state. As training progresses, `n` increases, making the problem more challenging and allowing the agent to build solving capabilities incrementally.
@@ -32,7 +24,7 @@ The project uses a curriculum learning strategy where the agent trains on progre
 - **Experience Replay**: Deque-based memory buffer for stable learning
 - **Target Network**: Separate target network updated periodically for stability
 - **Adaptive Curriculum**: Progressive difficulty with weighted scramble selection
-- **Real-time Visualization**: Training progress plots and performance metrics
+- **Visualization**: Training results are plotted (reward, epsilon, selected_n, episodes)
 - **Model Checkpointing**: Automatic saving of trained models
 - **Comprehensive Testing**: Evaluation framework with success rate metrics
 
