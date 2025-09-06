@@ -148,6 +148,8 @@ The training uses weighted selection within progressive difficulty phases:
 
 Within each phase, the system uses `select_n_2()` function with exponential weighting that favors higher complexity scrambles while maintaining some probability for easier cases.
 
+For example, n = 12 with a peak of 80% produces the following weights plotted on this graph: ![selected_n_function.png](media/selected_n_function.png)
+
 ### Epsilon-Greedy Exploration
 
 - **Decay Function**: `epsilon = k^(2x/n)` where k=0.002
