@@ -1,6 +1,6 @@
 # Rubik's Cube Solver using Deep Q-Network (DQN)
 
-A reinforcement learning project that trains a Deep Q-Network to solve a 2x2x2 Rubik's cube using PyTorch.
+A reinforcement learning project that trains a Deep Q-Network to solve a 2x2x2 Rubik's cube using PyTorch. The agent learns through curriculum learning, starting with simple scrambles and progressively tackling more complex cube configurations.
 
 ## Overview
 
@@ -8,197 +8,172 @@ This project implements a Deep Q-Network (DQN) agent that learns to solve a Rubi
 
 ## Algorithm Approach
 
-Similar to how humans learn, neural networks perform better when trained on incrementally increasing difficulty levels. This project implements a curriculum learning approach where the agent starts with simple cube configurations and gradually progresses to more complex ones.
+The project uses a curriculum learning strategy where the agent trains on progressively more difficult scrambled cubes. This approach mimics human learning - starting with simple problems and gradually increasing complexity.
 
 ### Key Algorithm Components
 
-**Progressive Difficulty Training**: The algorithm controls an independent variable `n` representing the number of random moves applied to scramble the cube from its solved state. As `n` increases, the problem becomes more challenging, allowing the agent to build up its solving capabilities step by step.
+**Progressive Difficulty Training**: The algorithm controls the number of random moves `n` used to scramble the cube from its solved state. As training progresses, `n` increases, making the problem more challenging and allowing the agent to build solving capabilities incrementally.
 
-**DQN Framework Requirements**:
-- **Environment**: Computes the next cube state given an action
-- **State Representation**: Binary encoding (1s and 0s) for each cube face to help the network quickly understand the relevance of different cube colors
+**DQN Framework**:
+
+- **Environment**: Custom 2x2x2 Rubik's cube implementation
+- **State Representation**: 144-dimensional flattened binary vector representing cube faces
 - **Actions**: 6 discrete actions corresponding to different cube rotations
-- **Reward Function**: 
-  - +5 for reaching the solved state (encourages success)
-  - -1 for each move taken (encourages efficiency and fewer moves)
+- **Reward Function**:
+  - +3 for reaching the solved state (configurable)
+  - -1 for each move taken (encourages efficiency)
+  - Early termination if moves exceed scramble complexity
 
 ## Features
 
-- **Custom Rubik's Cube Environment**: A simplified 2x2x2 cube implementation with 6 possible actions
-- **Deep Q-Network**: Neural network architecture for Q-value approximation
-- **Experience Replay**: Memory buffer for storing and sampling past experiences
-- **Target Network**: Separate target network for stable Q-learning
-- **Adaptive Training**: Progressive difficulty with different cube scrambling levels
-- **Visualization**: Training progress plots showing rewards and epsilon values
+- **Modular Architecture**: Clean separation of training, testing, and environment logic
+- **Custom Rubik's Cube Environment**: Optimized 2x2x2 cube with 6 rotation actions
+- **Deep Q-Network**: 144x256x10 model architecture for Q-value approximation
+- **Experience Replay**: Deque-based memory buffer for stable learning
+- **Target Network**: Separate target network updated periodically for stability
+- **Adaptive Curriculum**: Progressive difficulty with weighted scramble selection
+- **Real-time Visualization**: Training progress plots and performance metrics
 - **Model Checkpointing**: Automatic saving of trained models
+- **Comprehensive Testing**: Evaluation framework with success rate metrics
 
 ## Project Structure
 
 ```
 rubiks-cube-solver-rl/
-├── rubiks_dqn.py          # Main training script with DQN implementation
-├── env.py                 # Rubik's cube environment implementation
-├── sandbox.py             # Testing and debugging script
-├── requirements.txt       # Python dependencies
-├── README.md             # This documentation
-└── *.pth                 # Saved model checkpoints
+├── main.py                           # Main training and testing pipeline
+├── dqn.py                           # DQN implementation and training logic
+├── env.py                           # Rubik's cube environment
+├── test.py                          # Model evaluation and testing functions
+├── requirements.txt                 # Python dependencies
+└── README.md                        # Project documentation
 ```
 
 ## Installation
 
-1. Clone the repository:
+1. **Clone the repository:**
+
 ```bash
 git clone https://github.com/douglasichen/rubiks-cube-solver-rl.git
 cd rubiks-cube-solver-rl
 ```
 
-2. Create and activate a virtual environment:
+2. **Create a virtual environment (recommended):**
+
 ```bash
 python -m venv local.venv
 source local.venv/bin/activate  # On Windows: local.venv\Scripts\activate
 ```
 
-3. Install dependencies:
+3. **Install dependencies:**
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ## Usage
 
-### Training the Model
+### Quick Start - Training and Testing
 
-Run the main training script:
+Run the complete training and evaluation pipeline:
+
 ```bash
-python rubiks_dqn.py
+python main.py
 ```
 
-The training process will:
-- Train for 20,000 episodes by default (configurable via n_points)
-- Save model checkpoints every 100,000 episodes
-- Display training progress plots at the end
-- Use adaptive difficulty levels (1-3 moves to scramble by default)
+This will:
 
-### Testing the Environment
+- Train a DQN agent using curriculum learning (1-5 scramble moves)
+- Train for 150,000 episodes with progress visualization
+- Display rewards within a graph and logs success rates
 
-Use the sandbox script to test the cube environment:
-```bash
-python sandbox.py
-```
+### Custom Training
 
-### Loading Pre-trained Models
-
-To load a pre-trained model for evaluation or continued training:
+You can customize training parameters by modifying `main.py`:
 
 ```python
-import torch
-from rubiks_dqn import DQN
-
-# Load a pre-trained model
-model = DQN(input_dim=144, output_dim=6)
-model.load_state_dict(torch.load('rubiks_dqn_policy_net_88199.pth'))
-model.eval()  # Set to evaluation mode
+policy = train(
+    gamma=0.99,                                    # Discount factor
+    learning_rate=0.00001,                        # Learning rate
+    batch_size=256,                               # Training batch size
+    target_update_freq=1500,                      # Target network update frequency
+    memory_size=15000,                            # Experience replay buffer size
+    reward_for_solving=3,                         # Reward for solving the cube
+    save_model=True,                              # Save model checkpoints
+    n_points=[0, 1000, 2000, 3000, 50_000, 150_000],  # Training phase breakpoints
+    create_graph=True,                            # Generate training plots
+)
 ```
 
 ## Environment Details
 
 ### State Representation
+
 - **State Space**: 144-dimensional flattened vector representing the cube configuration
 - **Binary Encoding**: Each cube face is represented using only 1s and 0s to help the network quickly understand the relevance of different cube colors
 - **Action Space**: 6 discrete actions corresponding to different cube rotations
 - **Reward Structure**:
-  - +5 for solving the cube (encourages success)
-  - -1 for each move taken (encourages efficiency and fewer moves)
+  - +3 for solving the cube (encourages success)
+  - -1 for each move taken (encourages solving with fewer moves)
 
 ### Actions
-The cube supports 6 different rotation actions:
-- Action 0: Step 1 rotation
-- Action 1: Step 2 rotation  
-- Action 2: Step 3 rotation
-- Action 3: Step 4 rotation
-- Action 4: Step 5 rotation
-- Action 5: Step 6 rotation
+
+The cube supports 6 rotation actions corresponding to different face rotations. The specific mapping depends on the cube's internal representation in `env.py`.
 
 ## Model Architecture
 
 ### DQN Network
-- **Input Layer**: 144 neurons (flattened cube state)
-- **Hidden Layer 1**: 256 neurons with ReLU activation
-- **Hidden Layer 2**: 256 neurons with ReLU activation
-- **Output Layer**: 6 neurons (Q-values for each action)
 
-### Training Parameters
-- **Learning Rate**: 0.00001
-- **Gamma (Discount Factor)**: 0.99
-- **Epsilon Decay**: Exponential decay with k=0.002 and minimum of 0.00001
-- **Batch Size**: 256
-- **Memory Size**: 15,000 experiences
-- **Target Network Update**: Every 1,500 steps
-- **Optimizer**: Adam optimizer
+```python
+class DQN(nn.Module):
+    def __init__(self, input_dim=144, output_dim=6):
+        self.fc1 = nn.Linear(144, 256)    # Input layer
+        self.fc2 = nn.Linear(256, 256)    # Hidden layer 1
+        self.fc3 = nn.Linear(256, 6)      # Output layer (Q-values)
+```
+
 
 ## Training Strategy
 
-The training uses a progressive difficulty approach:
+### Curriculum Learning Phases
 
-1. **Phase 1** (Episodes 0-1,000): Learn to solve cubes scrambled with 1 move
-2. **Phase 2** (Episodes 1,000-2,000): Learn to solve cubes scrambled with 2 moves
-3. **Phase 3** (Episodes 2,000-20,000): Learn to solve cubes scrambled with 3 moves
+The training uses weighted selection within progressive difficulty phases:
 
-Each phase uses adaptive epsilon-greedy exploration with exponential decay. Within each phase, the difficulty level (number of scrambling moves) is selected using weighted random selection, favoring higher difficulty levels.
+1. **Phase 1** (0-1,000 episodes): 1-move scrambles
+2. **Phase 2** (1,000-2,000 episodes): 1-2 move scrambles
+3. **Phase 3** (2,000-3,000 episodes): 1-3 move scrambles
+4. **Phase 4** (3,000-50,000 episodes): 1-4 move scrambles
+5. **Phase 5** (50,000-150,000 episodes): 1-5 move scrambles
+
+### Adaptive Difficulty Selection
+
+Within each phase, the system uses `select_n_2()` function with exponential weighting that favors higher complexity scrambles while maintaining some probability for easier cases.
+
+### Epsilon-Greedy Exploration
+
+- **Decay Function**: `epsilon = k^(2x/n)` where k=0.002
+- **Minimum Epsilon**: 0.00001
+- **Phase-based**: Resets for each curriculum phase
 
 ## Results and Visualization
 
-The training script generates plots showing:
-- Episode rewards for each difficulty level
-- Epsilon values over time for each phase
-- Training progress across different scrambling levels
+Training generates comprehensive visualizations:
 
-## Model Checkpoints
+- **Reward Progression**: Episode rewards by scramble complexity
+- **Epsilon Decay**: Exploration rate over time
+- **Success Metrics**: Performance evaluation across difficulty levels
 
-Trained models are automatically saved as:
-- `rubiks_dqn_policy_net_{episode}.pth`: Policy network weights
-- `rubiks_dqn_target_net_{episode}.pth`: Target network weights
-
-### Available Pre-trained Models
-
-The repository includes several pre-trained model checkpoints:
-- Models saved at episodes: 0, 9999, 11999, 12999, 13999, 14999, 17999, 19999, 88199
-- Each checkpoint includes both policy and target network weights
-- The highest episode model (88199) represents the most trained version
+Example training results are stored in the `results/` directory.
 
 ## Dependencies
 
-- **PyTorch**: Deep learning framework
-- **NumPy**: Numerical computations
-- **Matplotlib**: Plotting and visualization
-- **Collections**: Deque for experience replay buffer
+Core requirements:
 
-## Customization
+- **PyTorch 2.8.0**: Deep learning framework
+- **NumPy 2.0.2**: Numerical computations
+- **Matplotlib 3.9.4**: Visualization and plotting
+- **tqdm 4.67.1**: Progress bars
 
-### Modifying Training Parameters
-Edit the constants in `rubiks_dqn.py`:
-```python
-MODEL_SAVE_PERIOD = 100_000    # Save frequency
-GAMMA = 0.99                   # Discount factor
-LEARNING_RATE = 0.001/10/10    # Learning rate
-EPSILON_MIN = 0.00001         # Minimum exploration
-```
-
-### Adjusting Training Phases
-Modify the `n_points` list to change training phases:
-```python
-n_points = [0, 1000, 2000, 20_000]
-```
-
-### Changing Network Architecture
-Modify the DQN class in `rubiks_dqn.py`:
-```python
-class DQN(nn.Module):
-    def __init__(self, input_dim, output_dim):
-        super(DQN, self).__init__()
-        self.fc1 = nn.Linear(input_dim, 256)  # Hidden layer size
-        self.fc2 = nn.Linear(256, 256)        # Hidden layer size
-        self.fc3 = nn.Linear(256, output_dim) # Output layer
-```
+See `requirements.txt` for complete dependency list with specific versions.
 
 ## Troubleshooting
 
@@ -225,23 +200,3 @@ class DQN(nn.Module):
 - [ ] Implement 3x3x3 cube support
 - [ ] Add visualization of cube solving process
 - [ ] Implement model evaluation and testing scripts
-
-## License
-
-This project is open source and available under the MIT License.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
-
-## Development Status
-
-This project is currently on the `feat/modularize` branch, which includes:
-- Modularized code structure
-- Pre-trained model checkpoints
-- Improved training configuration
-- Enhanced documentation
-
-## Acknowledgments
-
-This project is inspired by the classic Deep Q-Network paper and the challenge of applying reinforcement learning to combinatorial puzzles like the Rubik's cube.
