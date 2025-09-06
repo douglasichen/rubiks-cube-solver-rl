@@ -3,9 +3,9 @@ import random
 
 class RubiksCube():
 
-    def __init__(self):
+    def __init__(self, reward_for_solving: int):
 
-        self.reward_for_solving = 5
+        self.reward_for_solving = reward_for_solving
         self.nS = 144
         self.nA = 6
 
