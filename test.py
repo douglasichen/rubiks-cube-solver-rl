@@ -8,7 +8,7 @@ def test(policy_net: DQN, n: int, num_tests: int):
     num_solved = 0
     for _ in range(num_tests):
         state, _ = env.reset(n)
-        done = False
+        done = env.is_solved()
         moves = 0
         rewards = 0
         while not done:

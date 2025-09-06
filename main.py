@@ -9,10 +9,12 @@ policy = train(
     memory_size=15000,
     reward_for_solving=3,
     save_model=True,
-    n_points=[0, 1, 2, 10000, 50000],
+    n_points=[0, 1000, 2000, 3000, 50_000, 150_000],
+
+    # n_points=[0, 1000, 2000, 3000, 50_000],
     create_graph=True,
 )
 
 
-for n in range(1,50):
-    print(f"n={n}: {test(policy, n, 100) * 100:.1f}% success rate")
+for n in range(3, 10):
+    print(f"n={n}: {test(policy, n, 10000) * 100:.5f}% success rate")

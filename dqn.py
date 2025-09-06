@@ -172,7 +172,7 @@ def train(
         if n < len(n_points) - 1 and episode > n_points[n]:
             n += 1
 
-        selected_n = select_n(n)
+        selected_n = select_n_2(n)
         state, _ = env.reset(selected_n)
         episode_reward = 0
         done = env.is_solved()
