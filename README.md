@@ -4,7 +4,8 @@ A reinforcement learning project that trains a Deep Q-Network to solve a 2x2x2 R
 
 ### Key Algorithm Components
 
-**Progressive Difficulty Training**: The algorithm controls the number of random moves `n` used to scramble the cube from its solved state. As training progresses, `n` increases, making the problem more challenging and allowing the agent to build solving capabilities incrementally.
+**Progressive Difficulty Training**: The algorithm controls the number of random moves `n` used to scramble the cube from its solved state. As training progresses, `n` increases, making the problem more challenging and allowing the agent to build solving capabilities incrementally. The following graphs show the success rate improving over time for n = 1, 2, 3, 4 (higher blue line is better):
+![Training Results](media/four_mixes_results.png)
 
 **DQN Framework**:
 
@@ -64,7 +65,7 @@ pip install -r requirements.txt
 
 ## Usage
 
-### Quick Start - Training and Testing
+### Quick Start - Training
 
 Run the complete training and evaluation pipeline:
 
@@ -77,6 +78,15 @@ This will:
 - Train a DQN agent using curriculum learning (1-5 scramble moves)
 - Train for 150,000 episodes with progress visualization
 - Display rewards within a graph and logs success rates
+
+
+### Quick Start - Testing
+
+Run the testing script on the pretrained model:
+
+```bash
+python test.py
+```
 
 ### Custom Training
 
@@ -189,8 +199,6 @@ See `requirements.txt` for complete dependency list with specific versions.
 ## Future Improvements
 
 - [ ] Add GPU support for faster training
-- [ ] Implement Double DQN for better stability
 - [ ] Add curriculum learning with more sophisticated difficulty progression
 - [ ] Implement 3x3x3 cube support
 - [ ] Add visualization of cube solving process
-- [ ] Implement model evaluation and testing scripts
